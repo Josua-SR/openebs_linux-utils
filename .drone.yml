@@ -1,0 +1,73 @@
+---
+kind: pipeline
+name: linux-amd64
+
+clone:
+  depth: 1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: linux-utils-image
+    image: plugins/docker
+    settings:
+      registry: quay.io
+      repo: quay.io/josua-sr/linux-utils
+      tag: 1.7.0-amd64
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+
+---
+kind: pipeline
+name: linux-arm64
+
+clone:
+  depth: 1
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: linux-utils-image
+    image: plugins/docker
+    settings:
+      registry: quay.io
+      repo: quay.io/josua-sr/linux-utils
+      tag: 1.7.0-arm64
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+
+---
+kind: pipeline
+name: manifest
+
+clone:
+  depth: 1
+
+platform:
+  os: linux
+
+steps:
+  - name: linux-utils-image
+    image: plugins/manifest
+    settings:
+      target: quay.io/josua-sr/linux-utils:1.7.0
+      template: quay.io/josua-sr/linux-utils:1.7.0-ARCH
+      platforms:
+        - linux/amd64
+        - linux/arm64
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+
+depends_on:
+- linux-amd64
+- linux-arm64
